@@ -3,7 +3,7 @@ import numpy as np
 from tensorflow.keras import optimizers, layers, Model
 from os import path, makedirs
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from utils import DatasetIter, HistoryBuffer
+from utils import H5DatasetIter, HistoryBuffer
 from models import refiner_model, discriminator_model
 from datetime import datetime
 
@@ -22,7 +22,7 @@ R_UPDATE_PER_STEP = 2
 PRETRAIN_REFINER_STEPS = 1000
 PRETRAIN_DISC_STEPS = 1000
 
-# for every 100 steps plot refined images to tensorboard
+# save model every 100 steps
 DEBUG_INTERVAL = 100
 N_PLOG_IMGS = 10
 
@@ -161,8 +161,8 @@ def main():
     combined.compile(loss=[self_regularization_loss, local_adversarial_loss],
                      optimizer=optimizers.SGD(learning_rate=LEARNING_RATE))
 
-    real_ds = DatasetIter(args.real_ds_h5, BATCH_SIZE)
-    syn_ds = DatasetIter(args.syn_ds_h5, BATCH_SIZE)
+    real_ds = H5DatasetIter(args.real_ds_h5, BATCH_SIZE)
+    syn_ds = H5DatasetIter(args.syn_ds_h5, BATCH_SIZE)
 
     if args.refiner_model:
         R.load_weights(args.refiner_model)

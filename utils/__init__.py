@@ -2,7 +2,7 @@ import h5py
 import numpy as np
 import sys
 
-class DatasetIter:
+class H5DatasetIter:
 
     def __init__(self, h5_path, batch_size):
         with h5py.File(h5_path, 'r') as root:
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     h5_file = sys.argv[1]
     batch_size = 256
 
-    ds = DatasetIter(h5_file, batch_size)
+    ds = H5DatasetIter(h5_file, batch_size)
     # ds.data = ds.data[:300]
     for x in ds:
         print(x.shape)

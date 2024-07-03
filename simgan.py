@@ -3,8 +3,7 @@ import numpy as np
 from tensorflow.keras import optimizers, layers, Model
 from os import path, makedirs
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from h5_ds import DatasetIter
-from hist_buffer import HistoryBuffer
+from utils import DatasetIter, HistoryBuffer
 from models import refiner_model, discriminator_model
 from datetime import datetime
 

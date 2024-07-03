@@ -1,6 +1,7 @@
 # SimGAN
 
 Implementation of [SimGAN](https://arxiv.org/pdf/1612.07828v1) using Tensorflow 2.
+- Notes available [here](https://mnjm.github.io/ml-posts/simgan-notes/)
 
 ## Getting Started
 
@@ -19,7 +20,7 @@ You can find the dataset from Kaggle [here](https://www.kaggle.com/datasets/4qua
 To start training, run the following script:
 
 ```
-python train.py <real_h5_file> <simulated_h5_file> [--refiner_model <REF_MODEL_PATH>] [--discriminator_model <DISC_MODEL_PATH>]
+python simgan.py <real_h5_file> <simulated_h5_file> [--refiner_model <REF_MODEL_PATH>] [--discriminator_model <DISC_MODEL_PATH>]
 ```
 
 **Args**:
@@ -28,4 +29,4 @@ python train.py <real_h5_file> <simulated_h5_file> [--refiner_model <REF_MODEL_P
 - `<REF_MODEL_PATH>` - (Optional) Refiner model to start training from.
 - `<DISC_MODEL_PATH>` - (Optional) Discriminator model to start training from.
 
-- **Output**: Every [`DEBUG_INTERVAL`](https://github.com/mnjm/SimGAN/blob/main/simgan.py#L27) steps, Intermediate model checkpoints (refiner and discriminator) are saved in the `cache` directory.
+**Output**: Every [`DEBUG_INTERVAL`](https://github.com/mnjm/SimGAN/blob/main/simgan.py#L27) steps, Intermediate model checkpoints (refiner and discriminator) are saved in the `cache` directory.

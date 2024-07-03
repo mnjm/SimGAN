@@ -37,14 +37,26 @@ print('cache_dir', cache_dir)
 print('tb logs path', tb_writer_path)
 
 def self_regularization_loss(y_t, y_p):
+    """
+    self_regularization_loss: l1 norm between synthetic and refined images for the purpose of retaining annotations.
+    """
     return tf.multiply(LAMBDA, tf.reduce_sum(tf.abs(y_p - y_t)))
 
 def local_adversarial_loss(y_t, y_p):
+    """
+    local_adversarial_loss: mean of cross-entropy losses over local patches
+    """
     y_t = tf.reshape(y_t, (-1, 2))
     y_p = tf.reshape(y_p, (-1, 2))
     return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_t, logits=y_p))
 
 def get_cl_args():
+    """
+    get_cl_args: Create a command line argument parser and parse args
+
+    Return:
+        (argparse.Namespace): parsed arguments
+    """
     parser = ArgumentParser(description="Training", formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument("real_ds_h5", type=str, help="Real dataset h5 file")
     parser.add_argument("syn_ds_h5", type=str, help="Synthetic dataset h5 file")
@@ -53,6 +65,13 @@ def get_cl_args():
     return parser.parse_args()
 
 def pretrain_refiner(R, syn_ds):
+    """
+    pretrain_refiner: pretrain refiner using synthetic images. ( synthetic images[input] -> synthetic images[output] )
+
+    Args:
+        R (Model): Compiled Refiner model to pretrain
+        syn_ds (H5DatasetIter): Synthetic dataset iterator obj
+    """
     print(f"Pre-training refiner for {PRETRAIN_REFINER_STEPS} steps")
 
     for i in range(1, PRETRAIN_REFINER_STEPS+1):
@@ -73,6 +92,15 @@ def pretrain_refiner(R, syn_ds):
     print(f"Refiner pretrained saved at {save_path}")
 
 def pretrain_discriminator(D, R, real_ds, syn_ds):
+    """
+    pretrain_discriminator: pretrain discrminator to discrminate real and refined images
+
+    Args:
+        D (model): Compiled Discriminator Model
+        R (model): Compiled Refiner Model
+        real_ds (H5DatasetIter): Real dataset iterator obj
+        syn_ds (H5DatasetIter): Synthetic dataset iterator obj
+    """
     print(f"Pre-training discrminator for {PRETRAIN_DISC_STEPS} steps")
 
     y_real = np.array( [ [[1.0, 0.0]] * D.output_shape[1] ] * BATCH_SIZE )
@@ -96,6 +124,16 @@ def pretrain_discriminator(D, R, real_ds, syn_ds):
     print(f"Disc pretrained with saved at {save_path}")
 
 def adversarial_training(R, D, combined, syn_ds, real_ds):
+    """
+    adversarial_training: Implementation of training algorithm from paper
+
+    Args:
+        R (Model): Compiled Refiner Model
+        D (Model): Compiled Discriminator Model
+        combined (Model): Compiled Combined Model
+        syn_ds (H5DatasetIter): Synthetic dataset iterator obj
+        real_ds (H5DatasetIter): Real dataset iterator obj
+    """
     hist_buffer = HistoryBuffer(INPUT_SHAPE, HIST_BUFFER_SIZE, BATCH_SIZE)
 
     y_real = np.array( [ [[1.0, 0.0]] * D.output_shape[1] ] * BATCH_SIZE )
@@ -105,14 +143,17 @@ def adversarial_training(R, D, combined, syn_ds, real_ds):
     for i in range(1, STEPS+1):
         print(f"Step: {i}")
 
+        # Train refiner
         for _ in range(R_UPDATE_PER_STEP):
             syn_batch = next(syn_ds)
+            # Update R
             loss = combined.train_on_batch(syn_batch, [syn_batch, y_real])
             with tb_writer.as_default():
                 tf.summary.scalar("self_reg_loss", loss[0], step=i)
                 tf.summary.scalar("lcl_adv_loss", loss[1], step=i)
             print(f"self_reg_loss={loss[0]} lcl_adv_loss={loss[1]}")
 
+        # Train Discriminator
         for _ in range(D_UPDATE_PER_STEP):
             syn_batch = next(syn_ds)
             real_batch = next(real_ds)
@@ -126,8 +167,10 @@ def adversarial_training(R, D, combined, syn_ds, real_ds):
             if len(half_from_hist) > 0:
                 refined_batch[:BATCH_SIZE // 2] = half_from_hist
 
+            # Update D
             D_loss_real = D.train_on_batch(real_batch, y_real)
             D_loss_ref = D.train_on_batch(refined_batch, y_refined)
+
             with tb_writer.as_default():
                 tf.summary.scalar("D_real", D_loss_real, step=i)
                 tf.summary.scalar("D_ref", D_loss_ref, step=i)
@@ -144,6 +187,9 @@ def adversarial_training(R, D, combined, syn_ds, real_ds):
             combined.save(path.join(cache_dir, f"combined_{i}.keras"))
 
 def main():
+    """
+    main function
+    """
     args = get_cl_args()
 
     R = refiner_model(INPUT_SHAPE)

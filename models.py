@@ -1,8 +1,24 @@
 from tensorflow.keras import layers, Model
 
 def refiner_model(input_shape):
+    """ The Refiner network (R)
+
+    Args:
+        input_shape: Input tensor shape
+    Return:
+        (Model) refiner_model (R)
+    """
 
     def resnet_block(b_input, n_features, kernel_size):
+        """ ResNet Block which is made up of 2 conv layers each with n_features feature map sized kernel_size.
+
+        Args:
+            b_input (Layer): Input layer
+            n_features (int): number of feature maps in conv layers
+            kernel_size (int): feature map size
+        Return:
+            (Layer) Output layer from the ResNet Block
+        """
 
         x = layers.Conv2D(
             n_features,
@@ -34,6 +50,13 @@ def refiner_model(input_shape):
     return Model(inputs=input_l, outputs=output_l, name="R")
 
 def discriminator_model(input_shape):
+    """ The discriminator network (D)
+
+    Args:
+        input_shape: Input tensor shape
+    Return:
+        (Model) discriminator model (D)
+    """
 
     input_l = layers.Input(shape=input_shape)
 

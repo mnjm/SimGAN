@@ -25,14 +25,15 @@ def refiner_model(input_shape):
 
     x = layers.Conv2D(64, kernel_size=3, padding='same', activation='relu') (input_l)
 
-    for _ in range(4): x = resnet_block(x, 64, kernel_size=3)
+    for _ in range(4):
+        x = resnet_block(x, 64, kernel_size=3)
 
     # GAN Training hacks: https://github.com/soumith/ganhacks recommends tanh
     output_l = layers.Conv2D(input_shape[-1], kernel_size=1, padding='same', activation='tanh') (x)
 
     return Model(inputs=input_l, outputs=output_l, name="R")
 
-def descriminator_model(input_shape):
+def discriminator_model(input_shape):
 
     input_l = layers.Input(shape=input_shape)
 
@@ -83,7 +84,7 @@ def descriminator_model(input_shape):
 if __name__ == "__main__":
     INPUT_SHAPE = (35, 55, 1)
     R = refiner_model(INPUT_SHAPE)
-    D = descriminator_model(INPUT_SHAPE)
+    D = discriminator_model(INPUT_SHAPE)
 
     R.summary()
     print()

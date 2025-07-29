@@ -1,7 +1,10 @@
 # SimGAN
 
-Implementation of [SimGAN](https://arxiv.org/pdf/1612.07828v1) using Tensorflow 2.
-- Notes available [here](https://mnjm.github.io/ml-posts/simgan-notes/)
+Implementation of [Learning from Simulated and Unsupervised Images through Adversarial Training](https://arxiv.org/pdf/1612.07828v1) (Apple, 2016) using TensorFlow 2.
+
+SimGAN is a method introduced by Apple researchers in 2016 to improve synthetic (computer-generated) images using real, unlabeled data. It uses GAN with some twists, Generator (termed as Refiner in paper) takes synthetic images as input and refines them to look more realistic, Discriminator distinguishes between real images and refined synthetic images. Authors proposed a new loss termed "self-regularization loss" which is used to retain "annotations" from synthetic images to its refined version.
+
+![Pic](./assets/pic.png)
 
 ## Getting Started
 
@@ -28,5 +31,3 @@ python simgan.py <real_h5_file> <simulated_h5_file> [--refiner_model <REF_MODEL_
 - `<synthetic_h5_file>` - Path to the synthetic dataset in h5 format (`gaze.h5`)
 - `<REF_MODEL_PATH>` - (Optional) Refiner model to start training from.
 - `<DISC_MODEL_PATH>` - (Optional) Discriminator model to start training from.
-
-**Output**: Every [`DEBUG_INTERVAL`](https://github.com/mnjm/SimGAN/blob/main/simgan.py#L27) steps, Intermediate model checkpoints (refiner and discriminator) are saved in the `cache` directory.
